@@ -524,3 +524,7 @@
 
   syncRail(); render(location.pathname,false);
 })();
+
+
+  // Mobile bottom navigation: visible while scrolling up, hidden while scrolling down or idle.
+  (()=>{if(!matchMedia('(max-width:900px)').matches)return;let lastY=window.scrollY,idle=0;const root=document.documentElement;const show=()=>{root.classList.remove('mobile-nav-hidden');clearTimeout(idle);idle=setTimeout(()=>root.classList.add('mobile-nav-hidden'),2200)};const hide=()=>{root.classList.add('mobile-nav-hidden');clearTimeout(idle)};show();addEventListener('scroll',()=>{const y=window.scrollY,delta=y-lastY;if(Math.abs(delta)>5){delta<0?show():hide();lastY=y}}, {passive:true});addEventListener('touchstart',show,{passive:true});document.addEventListener('click',e=>{if(e.target.closest('.mobile-nav'))show()});})();
