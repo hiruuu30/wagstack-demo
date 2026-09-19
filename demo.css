@@ -54,3 +54,16 @@ html .home__brand-slot .demo-logo{width:120px!important;height:38px!important;ob
   .demo-booking-actions button{width:100%;min-height:42px;padding:9px 12px!important;white-space:normal;line-height:1.25;text-align:center}
   .demo-booking-actions .demo-badge{width:auto}
 }
+
+/* Compact mobile popup/message surfaces; keep close controls clear of demo bar */
+@media(max-width:700px){
+  .demo-toast{bottom:18px;max-width:calc(100vw - 32px);padding:9px 12px;border-radius:10px;font-size:11px;line-height:1.35}
+  .demo-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - var(--demo-bar-height) - 28px);padding:14px 14px 16px;margin-top:calc(var(--demo-bar-height) + 12px);overflow:auto}
+  .demo-dialog h2{font-size:18px;line-height:1.25;margin:0 34px 8px 0}
+  .demo-dialog p{font-size:11px;line-height:1.5;margin:7px 0}
+  .demo-dialog form{gap:10px}
+  .demo-dialog label{gap:4px;font-size:11px}
+  .demo-dialog input,.demo-dialog textarea,.demo-dialog select{padding:8px 9px;font-size:14px}
+  .demo-dialog textarea{min-height:72px}
+  .demo-close{position:absolute!important;right:10px!important;top:10px!important;z-index:1003000!important;width:32px!important;height:32px!important;min-height:32px!important;padding:0!important;display:grid!important;place-items:center!important}
+}
