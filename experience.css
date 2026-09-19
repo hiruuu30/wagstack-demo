@@ -323,3 +323,19 @@ html.a11y-reduce-motion .bento__reel-track,html.a11y-reduce-motion .health-marqu
   html .hero-canvas{background:transparent!important}
   html .hero-canvas canvas{opacity:1!important;filter:contrast(1.18) saturate(1.08)!important}
 }
+
+/* Keep mobile header action buttons perfectly circular in dark mode */
+@media(max-width:900px){
+  html[data-theme="dark"] :is(.rail__social,.rail__theme){
+    width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;
+    min-height:36px!important;max-height:36px!important;flex:0 0 36px!important;
+    padding:0!important;aspect-ratio:1/1!important;border-radius:50%!important;
+    display:grid!important;place-items:center!important;
+  }
+}
+@media(max-width:620px){
+  html[data-theme="dark"] :is(.rail__social,.rail__theme){
+    width:32px!important;height:32px!important;min-width:32px!important;max-width:32px!important;
+    min-height:32px!important;max-height:32px!important;flex-basis:32px!important;
+  }
+}
