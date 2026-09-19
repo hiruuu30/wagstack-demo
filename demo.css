@@ -13,3 +13,35 @@ html .home__brand-slot .demo-logo{width:120px!important;height:38px!important;ob
 @media(max-width:700px){html .home__brand-slot .demo-logo{width:86px!important;height:26px!important;margin-bottom:5px!important}html .home__brand-slot .demo-inline-brand{font-size:20px!important}html .home__brand-slot .demo-brand-tagline{display:none!important}}
 
 .demo-get .mobile-label{display:none}@media(max-width:700px){.demo-get .mobile-label{display:inline}}
+
+/* Mobile sizing polish: preserve desktop/demo behavior */
+@media(max-width:700px){
+  :root{--demo-bar-height:76px}
+  .demo-bar{height:var(--demo-bar-height);display:flex;gap:5px;padding:7px 9px;align-items:center}
+  .demo-bar-brand{margin-right:auto;min-width:0}
+  .demo-bar-brand strong{max-width:105px;font-size:11px;line-height:1.2}
+  .demo-bar-brand small{display:none}
+  .demo-view-switch{gap:1px;padding:2px;border-radius:9px;flex-shrink:0}
+  .demo-view-switch button{min-height:30px;padding:5px 7px;font-size:10px}
+  .demo-bar .demo-start-tour,.demo-bar .demo-get{min-height:32px;padding:5px 7px;font-size:10px}
+  .demo-bar .demo-menu{flex-shrink:0}
+  .demo-menu summary{padding:6px;font-size:11px}
+  .demo-menu-panel{top:36px;width:min(220px,calc(100vw - 18px));padding:10px}
+  .demo-tour{right:9px;bottom:12px;width:calc(100vw - 18px);max-width:330px;padding:13px 14px;border-radius:16px}
+  .demo-tour small{font-size:9px}
+  .demo-tour h2{font-size:16px;line-height:1.25;margin:5px 0}
+  .demo-tour p{font-size:11px;line-height:1.45;margin:0 0 10px}
+  .demo-tour-actions{gap:5px}
+  .demo-tour-actions button{min-height:32px;padding:6px 9px;font-size:10px;border-radius:8px}
+  .demo-dialog{max-height:calc(100dvh - var(--demo-bar-height) - 12px);margin-top:calc(var(--demo-bar-height) + 6px);padding:18px 16px;border-radius:18px}
+  .demo-dialog h2{font-size:21px;margin-right:38px}
+  .demo-close{position:sticky;float:right;right:0;top:0;z-index:2;min-height:32px!important;padding:1px 8px!important;font-size:19px!important}
+  .demo-surface{padding-top:20px}
+}
+@media(max-width:390px){
+  :root{--demo-bar-height:68px}
+  .demo-bar-brand strong{max-width:82px;font-size:10px}
+  .demo-view-switch button{padding:4px 5px;font-size:9px}
+  .demo-bar .demo-start-tour,.demo-bar .demo-get{padding:4px 5px;font-size:9px}
+  .demo-tour{max-width:calc(100vw - 14px);right:7px;bottom:8px;padding:11px 12px}
+}
