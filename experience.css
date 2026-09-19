@@ -355,3 +355,28 @@ html.a11y-reduce-motion .bento__reel-track,html.a11y-reduce-motion .health-marqu
     min-height:32px!important;max-height:32px!important;flex:0 0 32px!important;
   }
 }
+
+/* Smoother mobile bottom-nav entrance/exit */
+@media(max-width:900px){
+  html .mobile-nav{
+    transform:translate3d(0,0,0);
+    opacity:1;
+    visibility:visible;
+    transition:
+      transform .46s cubic-bezier(.22,1,.36,1),
+      opacity .30s ease,
+      visibility 0s linear 0s!important;
+    will-change:transform,opacity;
+    backface-visibility:hidden;
+  }
+  html.mobile-nav-hidden .mobile-nav{
+    transform:translate3d(0,calc(100% + env(safe-area-inset-bottom) + 12px),0)!important;
+    opacity:0!important;
+    visibility:hidden;
+    pointer-events:none!important;
+    transition:
+      transform .38s cubic-bezier(.4,0,.2,1),
+      opacity .26s ease,
+      visibility 0s linear .38s!important;
+  }
+}
