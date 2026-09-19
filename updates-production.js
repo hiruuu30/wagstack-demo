@@ -107,19 +107,45 @@ function renderWeatherSlide(post) {
   const wind = Number(weather.wind);
   const rain = Number(weather.rain);
   if (![temperature, wind, rain].every(Number.isFinite)) return '';
-  const condition = escapeHtml(weather.condition || 'Weather update');
+  const rawCondition=String(weather.condition||'').toLowerCase();
+  const condition=escapeHtml(weather.condition || 'Weather update');
   const checked=Date.parse(post.last_checked_at||post.published_at||'');
   const stale=!Number.isFinite(checked)||Date.now()-checked>2*60*60*1000;
-  const reason = weather.reason === 'Conditions easing' ? 'Conditions have eased' : weather.reason === 'Temperature shifted' ? 'A noticeable temperature shift was detected' : 'A meaningful weather change was detected';
-  return `<article class="home__promo-slide weather-slide" data-update-id="weather-${WEATHER_ID}">
+
+  let walkTitle='Good time for a walk';
+  let walkNote='Conditions look comfortable. Enjoy the walk and bring water.';
+  let walkState='good';
+  if(stale){
+    walkTitle='Check before you walk';
+    walkNote='This weather report may be outdated. Check current conditions before heading out.';
+    walkState='check';
+  }else if(rawCondition.includes('thunder')||rain>=2){
+    walkTitle='Better to wait';
+    walkNote='Rain or storms can make a walk uncomfortable. Indoor play is a better option for now.';
+    walkState='wait';
+  }else if(rawCondition.includes('rain')||rain>0){
+    walkTitle='Keep the walk short';
+    walkNote='Light rain is possible. A quick walk close to home is the safer choice.';
+    walkState='short';
+  }else if(temperature>=32){
+    walkTitle='Better to wait';
+    walkNote='It is hot outside. Wait for a cooler part of the day before walking your pet.';
+    walkState='wait';
+  }else if(temperature>=29){
+    walkTitle='Keep the walk short';
+    walkNote='It is warm outside. Keep the walk easy, stay in the shade, and bring water.';
+    walkState='short';
+  }
+
+  return `<article class="home__promo-slide weather-slide weather-walk--${walkState}" data-update-id="weather-${WEATHER_ID}">
     <div class="update-copy">
-      <span>QUEZON CITY · WEATHER</span>
-      <strong>${condition}</strong>
-      <small>${stale?'Last reported conditions. Check the latest forecast before heading out.':escapeHtml(weather.hot?'Plan walks for cooler hours and keep water handy':String(weather.condition).toLowerCase().includes('rain')||String(weather.condition).toLowerCase().includes('thunder')?'Keep walks brief and plan indoor play':reason)+'.'}</small>
+      <span>QUEZON CITY · PET WALK</span>
+      <strong>${walkTitle}</strong>
+      <small>${walkNote}</small>
     </div>
     <div class="weather-art" aria-label="${condition}, ${Math.round(temperature)} degrees Celsius, wind ${Math.round(wind)} kilometers per hour">
       <div class="weather-icon" aria-hidden="true">${weatherIcon(weather)}</div>
-      <div class="weather-metrics"><b>${Math.round(temperature)}°</b><span>${Math.round(wind)} km/h wind</span><span>${rain.toFixed(rain >= 1 ? 1 : 1)} mm rain</span></div>
+      <div class="weather-metrics"><b>${Math.round(temperature)}°</b><span>${condition}</span><span>${rain.toFixed(1)} mm rain</span></div>
     </div>
     <span class="weather-source">${stale?'Last report':'Checked'} · ${Number.isFinite(checked)?escapeHtml(new Date(checked).toLocaleString('en-PH',{timeZone:'Asia/Manila',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})):'Time unavailable'}</span>
   </article>`;
