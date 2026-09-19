@@ -315,3 +315,11 @@ html.a11y-reduce-motion .bento__reel-track,html.a11y-reduce-motion .health-marqu
   html .kape__send{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;padding:0!important}
   html .kape__foot{font-size:9px!important;padding:0 8px 8px!important}
 }
+
+/* Mobile nav auto-hide + stronger animated canvas presence */
+@media(max-width:900px){
+  html .mobile-nav{transition:transform .28s cubic-bezier(.22,1,.36,1),opacity .2s ease!important;will-change:transform,opacity}
+  html.mobile-nav-hidden .mobile-nav{transform:translateY(calc(100% + env(safe-area-inset-bottom) + 8px))!important;opacity:0!important;pointer-events:none!important}
+  html .hero-canvas{background:transparent!important}
+  html .hero-canvas canvas{opacity:1!important;filter:contrast(1.18) saturate(1.08)!important}
+}
