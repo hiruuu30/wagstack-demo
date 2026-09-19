@@ -45,3 +45,12 @@ html .home__brand-slot .demo-logo{width:120px!important;height:38px!important;ob
   .demo-bar .demo-start-tour,.demo-bar .demo-get{padding:4px 5px;font-size:9px}
   .demo-tour{max-width:calc(100vw - 14px);right:7px;bottom:8px;padding:11px 12px}
 }
+
+/* Mobile owner pet-card action repair */
+@media(max-width:700px){
+  .demo-booking{grid-template-columns:48px minmax(0,1fr);align-items:start;min-height:0}
+  .demo-booking img{width:48px;height:48px}
+  .demo-booking-actions{grid-column:1/-1;display:flex;justify-content:stretch;width:100%;margin-top:4px}
+  .demo-booking-actions button{width:100%;min-height:42px;padding:9px 12px!important;white-space:normal;line-height:1.25;text-align:center}
+  .demo-booking-actions .demo-badge{width:auto}
+}
