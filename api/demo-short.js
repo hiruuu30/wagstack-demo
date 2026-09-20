@@ -39,8 +39,12 @@ module.exports=async(req,res)=>{
     const raw=String(req.body?.url||'').trim();
     if(!allowedTarget(raw,req))return reply(res,400,{error:'Invalid demo share link'});
     if(raw.length>10000)return reply(res,413,{error:'Logo is too large for an outreach link. Re-upload a simpler logo.'});
-    const url=await spoo(raw);
-    return reply(res,200,{url});
+    const stored=await spoo(raw);
+    const code=new URL(stored).pathname.replace(/^\/+|\/+$/g,'');
+    if(!/^[A-Za-z0-9._~%-]{2,64}$/.test(code))throw new Error('Invalid short code');
+    const proto=String(req.headers['x-forwarded-proto']||'https').split(',')[0].trim();
+    const own=proto+'://'+req.headers.host+'/s/'+encodeURIComponent(code);
+    return reply(res,200,{url:own});
   }catch(error){
     console.error('[demo-short]',error?.message||error);
     return reply(res,502,{error:'Could not create the outreach link. Please try again.'});
