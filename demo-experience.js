@@ -32,7 +32,7 @@ function write(s){window.DemoWorkspace?.set(s);localStorage.setItem(STORE,JSON.s
 function dialog(title,body){document.querySelector('.demo-dialog')?.remove();lastFocused=document.activeElement;const d=document.createElement('dialog');d.className='demo-dialog';d.setAttribute('aria-label',title);d.innerHTML=`<button class="demo-close" aria-label="Close dialog" type="button">×</button><h2>${esc(title)}</h2>${body}`;document.body.append(d);d.querySelector('.demo-close').onclick=()=>d.close();d.addEventListener('close',()=>{d.remove();lastFocused?.focus()});d.addEventListener('click',e=>{if(e.target===d&&e.clientX&&(e.clientX<d.getBoundingClientRect().left||e.clientX>d.getBoundingClientRect().right))d.close()});d.showModal();return d}
 function brandDialog(){
   track('branding_open');
-  let selectedFile=null,uploadedUrl=/^https:\/\//i.test(config.logo)?config.logo:'';
+  let selectedFile=null,uploadedUrl=(/^https:\/\//i.test(config.logo)||/^data:image\//i.test(config.logo))?config.logo:'';
   const d=dialog('Make it your brand',`<p>Preview your business identity across the demo.</p><form>
     <label>Business name<input name="name" maxlength="60" required value="${esc(config.name)}"></label>
     <label>Accent color<input type="color" name="color" value="${esc(config.color)}"></label>
