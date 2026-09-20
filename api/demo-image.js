@@ -4,11 +4,7 @@ const ALLOWED_HOSTS=[
   'openai.com',
   'oaiusercontent.com',
   'oaistatic.com',
-  'blob.core.windows.net',
-  'blob.vercel-storage.com',
-  'cleanuri.com',
-  'is.gd',
-  'v.gd'
+  'blob.core.windows.net'
 ];
 
 function allowedHost(host){
