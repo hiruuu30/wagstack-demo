@@ -41,7 +41,7 @@ function brandDialog(){
     <small class="demo-upload-note">PNG, JPG, WebP or SVG, up to 2 MB. The logo is included when you copy the demo link.</small>
     <label>Or use a logo image URL<input type="url" name="logo" placeholder="https://your-site.com/logo.png" value="${esc(/^https:\/\//i.test(config.logo)?config.logo:'')}"></label>
     <label>Client link label<input name="client" maxlength="60" pattern="[A-Za-z0-9_-]+" value="${esc(config.client)}" required></label>
-    <div class="demo-form-actions"><button class="demo-primary" type="submit">Apply branding</button><button type="button" data-copy-brand>Copy share link</button></div>
+    <div class="demo-form-actions"><button class="demo-primary" type="submit">Apply branding</button><button type="button" data-copy-brand>Copy short link</button></div>
     <p class="demo-form-status" role="status"></p>
   </form>`);
   const form=d.querySelector('form'),status=d.querySelector('[role=status]'),fileInput=d.querySelector('[name=logoFile]'),previewWrap=d.querySelector('.demo-logo-upload-preview'),preview=d.querySelector('[data-logo-preview]');
@@ -77,9 +77,10 @@ function brandDialog(){
         const webp=canvas.toDataURL('image/webp',quality);
         return webp.startsWith('data:image/webp')?webp:canvas.toDataURL('image/png');
       };
-      let data=render(160,.82);
-      if(data.length>45000)data=render(112,.72);
-      if(data.length>65000)throw new Error('Please use a simpler or smaller logo image.');
+      let data=render(64,.72);
+      if(data.length>2800)data=render(52,.62);
+      if(data.length>2800)data=render(44,.55);
+      if(data.length>3200)throw new Error('Please use a simpler logo image so the outreach link can stay short.');
       return data;
     }finally{URL.revokeObjectURL(url)}
   }
@@ -109,7 +110,23 @@ function brandDialog(){
     try{return {...v,logo:await uploadIfNeeded(v)}}catch(err){status.textContent=err.message||'Logo upload failed.';return null}
   }
   form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('[type=submit]');button.disabled=true;const v=await collect();if(!v){button.disabled=false;return}localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));location.href=link(v)};
-  d.querySelector('[data-copy-brand]').onclick=async()=>{const v=await collect();if(!v)return;const share=link(v);localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));try{await navigator.clipboard.writeText(share);status.textContent='Link copied with the logo included.'}catch{status.textContent=share}};
+  d.querySelector('[data-copy-brand]').onclick=async()=>{
+    const button=d.querySelector('[data-copy-brand]');button.disabled=true;
+    const v=await collect();
+    if(!v){button.disabled=false;return}
+    const share=link(v);
+    localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));
+    status.textContent='Creating short link…';
+    let outreach=share;
+    try{
+      const r=await fetch('/api/demo-short',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:share})});
+      const out=await r.json().catch(()=>({}));
+      if(r.ok&&out.url)outreach=out.url;
+    }catch{}
+    try{await navigator.clipboard.writeText(outreach);status.textContent=outreach===share?'Link copied.':'Short outreach link copied.'}
+    catch{status.textContent=outreach}
+    button.disabled=false;
+  };
 }
 function inquiry(){track('inquiry_click');const d=dialog('Let’s make it yours.',`<p>Tell Brick & Bond about your business. Your request includes the demo branding you’re viewing.</p><form><label>Business name<input name="business" maxlength="100" required value="${esc(config.name==='Your Brand'?'':config.name)}"></label><label>Your name<input name="name" maxlength="100" required autocomplete="name"></label><label>Email address<input name="email" type="email" maxlength="180" required autocomplete="email"></label><label>What would you like included?<textarea name="needs" maxlength="2000">Grooming and hotel booking, pet profiles, rewards, and shop.</textarea></label><label class="demo-honeypot">Website<input name="website" tabindex="-1" autocomplete="off"></label><label class="demo-checkbox"><input type="checkbox" required name="consent">I agree to share these details with Brick & Bond so they can respond to this inquiry.</label><button class="demo-primary" type="submit">Request my own version</button><p class="demo-form-status" role="status"></p><p>This sends a real inquiry, not a demo booking. No payment is collected.</p></form>`);d.querySelector('form').onsubmit=async e=>{e.preventDefault();const form=e.target,button=form.querySelector('[type=submit]'),status=form.querySelector('[role=status]');button.disabled=true;status.textContent='Sending your request…';const payload={...Object.fromEntries(new FormData(form)),client:config.client,brand:config.name,color:config.color};try{const r=await fetch('/api/demo-inquiry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw Error();status.textContent='Your request is saved. Brick & Bond will review your details and contact you.';form.querySelectorAll('input,textarea').forEach(e=>e.disabled=true);track('inquiry_submit')}catch{status.replaceChildren(document.createTextNode('Your request was not sent. Please try again, or '));const a=document.createElement('a');a.textContent='open an email draft';a.href='mailto:hello@brickand.bond?subject='+encodeURIComponent('Pet-care app inquiry — '+payload.business)+'&body='+encodeURIComponent(`Name: ${payload.name}\nBusiness: ${payload.business}\nEmail: ${payload.email}\nInterested in: ${payload.needs}\nDemo: ${config.client}`);status.append(a);button.disabled=false}}}
 const tour=[{path:'/',title:'Here’s the customer view.',copy:'This is where customers can see their pets, appointments, care reminders, and rewards.',target:'.home__glass--showcase'},{path:'/pets',title:'Here’s Biscuit’s profile.',copy:'Each pet has their own profile, with basic details and care records in one place.',target:'.pet-workspace-v25'},{path:'/grooming',title:'Try booking a service.',copy:'Choose a service, date, and time. You can fill it out yourself or add a sample booking.',target:'.clone-glass',action:true},{owner:true,title:'Now check the owner side.',copy:'The booking shows up here. You can confirm it, and the customer will see the updated status.',target:'.demo-owner-list'},{path:'/rewards',title:'Rewards are here too.',copy:'Customers can check their points and membership along with their bookings and pet records.',target:'.clone-glass'},{path:'/',title:'That’s the basic flow.',copy:'You can also try your business name and logo, or tell us what you’d want in your own version.',target:'.home__brand-slot'}];
