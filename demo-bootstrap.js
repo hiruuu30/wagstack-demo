@@ -11,6 +11,6 @@
   document.documentElement.style.setProperty('--demo-accent',color);
   // Allow only this demo's APIs; backend isolation is additionally enforced by CSP.
   const nativeFetch=window.fetch.bind(window);
-  window.fetch=(resource,options)=>{const url=new URL(resource instanceof Request?resource.url:resource,location.href);if(url.origin!==location.origin)return Promise.reject(new Error('External data connections are disabled in this demo.'));if(url.pathname.startsWith('/api/')&&!['/api/demo-events','/api/demo-inquiry','/api/demo-report'].includes(url.pathname))return Promise.reject(new Error('This action is not connected in the demo.'));return nativeFetch(resource,options)};
+  window.fetch=(resource,options)=>{const url=new URL(resource instanceof Request?resource.url:resource,location.href);if(url.origin!==location.origin)return Promise.reject(new Error('External data connections are disabled in this demo.'));if(url.pathname.startsWith('/api/')&&!['/api/demo-events','/api/demo-inquiry','/api/demo-report','/api/demo-logo'].includes(url.pathname))return Promise.reject(new Error('This action is not connected in the demo.'));return nativeFetch(resource,options)};
   if(location.pathname.startsWith('/auth/')||location.pathname==='/admin')history.replaceState({},'', '/');
 })();
