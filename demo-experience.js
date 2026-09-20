@@ -86,7 +86,18 @@ function brandDialog(){
     }finally{URL.revokeObjectURL(url)}
   }
   async function uploadIfNeeded(v){
-    if(!selectedFile)return uploadedUrl||v.logoUrl;
+    if(!selectedFile){
+      const existing=uploadedUrl||v.logoUrl;
+      if(/^data:image\//i.test(existing)&&existing.length>1600){
+        status.textContent='Optimizing logo for sharing…';
+        try{
+          const blob=await fetch(existing).then(r=>r.blob());
+          uploadedUrl=await compactLogo(blob);
+          return uploadedUrl;
+        }catch{}
+      }
+      return existing;
+    }
     status.textContent='Preparing logo…';
     const file=selectedFile;
     const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=reject;r.readAsDataURL(file)});
