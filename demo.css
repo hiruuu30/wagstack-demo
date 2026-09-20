@@ -67,3 +67,10 @@ html .home__brand-slot .demo-logo{width:120px!important;height:38px!important;ob
   .demo-dialog textarea{min-height:72px}
   .demo-close{position:absolute!important;right:10px!important;top:10px!important;z-index:1003000!important;width:32px!important;height:32px!important;min-height:32px!important;padding:0!important;display:grid!important;place-items:center!important}
 }
+
+.demo-logo-upload-preview{display:flex;align-items:center;justify-content:center;min-height:86px;padding:12px;border:1px dashed var(--demo-line);border-radius:14px;background:#f7f9fc}
+.demo-logo-upload-preview[hidden]{display:none!important}
+.demo-logo-upload-preview img{display:block;max-width:180px;max-height:64px;object-fit:contain}
+.demo-upload-note{display:block;margin-top:-8px;color:var(--demo-muted);font-size:10px;line-height:1.4}
+[data-theme=dark] .demo-logo-upload-preview{background:#0f1c30;border-color:#34465f}
+@media(max-width:700px){.demo-logo-upload-preview{min-height:68px;padding:9px}.demo-logo-upload-preview img{max-width:150px;max-height:50px}.demo-upload-note{font-size:9px}}
