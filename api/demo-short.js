@@ -34,9 +34,9 @@ async function spoo(raw){
 
 module.exports=async(req,res)=>{
   try{
-    if(!['POST','GET'].includes(req.method)){res.setHeader('Allow','POST, GET');return reply(res,405,{error:'Method not allowed'})}
-    if(req.method==='POST'&&!sameOrigin(req))return reply(res,403,{error:'Origin not allowed'});
-    const raw=String(req.method==='GET'?(Array.isArray(req.query?.url)?req.query.url[0]:req.query?.url):req.body?.url||'').trim();
+    if(req.method!=='POST'){res.setHeader('Allow','POST');return reply(res,405,{error:'Method not allowed'})}
+    if(!sameOrigin(req))return reply(res,403,{error:'Origin not allowed'});
+    const raw=String(req.body?.url||'').trim();
     if(!allowedTarget(raw,req))return reply(res,400,{error:'Invalid demo share link'});
     if(raw.length>10000)return reply(res,413,{error:'Logo is too large for an outreach link. Re-upload a simpler logo.'});
     const url=await spoo(raw);
