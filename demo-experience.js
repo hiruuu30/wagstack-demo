@@ -124,6 +124,7 @@ function brandDialog(){
     u.searchParams.set('b',v.name);
     u.searchParams.set('c',v.color.slice(1));
     u.searchParams.set('i',v.client);
+    u.searchParams.set('v',Date.now().toString(36).slice(-7));
     if(v.logo)u.searchParams.set('l',await compactOutreachLogo(v.logo));
     return u.href;
   };
