@@ -44,7 +44,7 @@ module.exports=async(req,res)=>{
     demo.searchParams.set('color',color);
     demo.searchParams.set('client',client);
     if(logo)demo.searchParams.set('logo',logo);
-    const img=imageUrl(req,logo);
+    const img=origin(req)+'/api/demo-og?code='+encodeURIComponent(code);
     const title=brand+' — Pet care demo';
     const description='A private interactive pet-care website and app concept prepared for '+brand+'.';
     const canonical=origin(req)+'/s/'+encodeURIComponent(code);
@@ -57,7 +57,11 @@ module.exports=async(req,res)=>{
       '<meta property="og:title" content="'+esc(title)+'">'+
       '<meta property="og:description" content="'+esc(description)+'">'+
       '<meta property="og:image" content="'+esc(img)+'">'+
-      '<meta property="og:image:alt" content="'+esc(brand)+' logo">'+
+      '<meta property="og:image:secure_url" content="'+esc(img)+'">'+
+      '<meta property="og:image:type" content="image/png">'+
+      '<meta property="og:image:width" content="1200">'+
+      '<meta property="og:image:height" content="630">'+
+      '<meta property="og:image:alt" content="'+esc(brand)+' branded demo preview">'+
       '<meta property="og:url" content="'+esc(canonical)+'">'+
       '<meta name="twitter:card" content="summary_large_image">'+
       '<meta name="twitter:title" content="'+esc(title)+'">'+
