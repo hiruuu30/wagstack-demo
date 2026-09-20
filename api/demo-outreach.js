@@ -44,7 +44,7 @@ module.exports=async(req,res)=>{
     demo.searchParams.set('color',color);
     demo.searchParams.set('client',client);
     if(logo)demo.searchParams.set('logo',logo);
-    const img=origin(req)+'/api/demo-og?code='+encodeURIComponent(code);
+    const img=origin(req)+'/og/'+encodeURIComponent(code)+'.png';
     const title=brand+' — Pet care demo';
     const description='A private interactive pet-care website and app concept prepared for '+brand+'.';
     const canonical=origin(req)+'/s/'+encodeURIComponent(code);
