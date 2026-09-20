@@ -77,10 +77,11 @@ function brandDialog(){
         const webp=canvas.toDataURL('image/webp',quality);
         return webp.startsWith('data:image/webp')?webp:canvas.toDataURL('image/png');
       };
-      let data=render(64,.72);
-      if(data.length>2800)data=render(52,.62);
-      if(data.length>2800)data=render(44,.55);
-      if(data.length>3200)throw new Error('Please use a simpler logo image so the outreach link can stay short.');
+      let data=render(56,.68);
+      if(data.length>1800)data=render(46,.58);
+      if(data.length>1600)data=render(38,.50);
+      if(data.length>1450)data=render(32,.44);
+      if(data.length>1600)throw new Error('Please use a simpler logo image so the outreach link can stay short.');
       return data;
     }finally{URL.revokeObjectURL(url)}
   }
@@ -117,14 +118,15 @@ function brandDialog(){
     const share=link(v);
     localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));
     status.textContent='Creating short link…';
-    let outreach=share;
     try{
       const r=await fetch('/api/demo-short',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:share})});
       const out=await r.json().catch(()=>({}));
-      if(r.ok&&out.url)outreach=out.url;
-    }catch{}
-    try{await navigator.clipboard.writeText(outreach);status.textContent=outreach===share?'Link copied.':'Short outreach link copied.'}
-    catch{status.textContent=outreach}
+      if(!r.ok||!out.url)throw new Error(out.error||'Could not create short link');
+      try{await navigator.clipboard.writeText(out.url);status.textContent='Short outreach link copied.'}
+      catch{status.textContent=out.url}
+    }catch(err){
+      status.textContent=err.message||'Could not create short link. Please try again.';
+    }
     button.disabled=false;
   };
 }
