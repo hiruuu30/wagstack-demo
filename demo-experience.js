@@ -12,7 +12,7 @@ function logoSrc(value){
   if(!raw)return '/assets/branddemo-brandmark.svg';
   try{
     const u=new URL(raw,location.origin),h=u.hostname.toLowerCase();
-    const openAI=h==='chatgpt.com'||h.endsWith('.chatgpt.com')||h==='openai.com'||h.endsWith('.openai.com')||h==='oaiusercontent.com'||h.endsWith('.oaiusercontent.com')||h==='oaistatic.com'||h.endsWith('.oaistatic.com')||h==='blob.core.windows.net'||h.endsWith('.blob.core.windows.net');
+    const openAI=h==='chatgpt.com'||h.endsWith('.chatgpt.com')||h==='openai.com'||h.endsWith('.openai.com')||h==='oaiusercontent.com'||h.endsWith('.oaiusercontent.com')||h==='oaistatic.com'||h.endsWith('.oaistatic.com')||h==='blob.core.windows.net'||h.endsWith('.blob.core.windows.net')||h.endsWith('.blob.vercel-storage.com')||h==='cleanuri.com'||h==='is.gd'||h==='v.gd';
     if(u.protocol==='https:'&&openAI)return '/api/demo-image?url='+encodeURIComponent(u.href);
   }catch{}
   return raw;
@@ -126,11 +126,20 @@ function brandDialog(){
     const button=d.querySelector('[data-copy-brand]');button.disabled=true;
     const v=await collect();
     if(!v){button.disabled=false;return}
-    const share=link(v);
-    localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));
-    status.textContent='Creating short link…';
+    let finalBrand={...v};
+    if(/^https:\/\//i.test(finalBrand.logo)&&!/^(https:\/\/)?(?:cleanuri\.com|is\.gd|v\.gd)\//i.test(finalBrand.logo)){
+      status.textContent='Shortening logo link…';
+      try{
+        const lr=await fetch('/api/demo-short',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:finalBrand.logo,kind:'image'})});
+        const lo=await lr.json().catch(()=>({}));
+        if(lr.ok&&lo.url)finalBrand.logo=lo.url;
+      }catch{}
+    }
+    const share=link(finalBrand);
+    localStorage.setItem('demo-brand',JSON.stringify({name:finalBrand.name,color:finalBrand.color,logo:finalBrand.logo,client:finalBrand.client}));
+    status.textContent='Creating short outreach link…';
     try{
-      const r=await fetch('/api/demo-short',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:share})});
+      const r=await fetch('/api/demo-short',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:share,kind:'share'})});
       const out=await r.json().catch(()=>({}));
       if(!r.ok||!out.url)throw new Error(out.error||'Could not create short link');
       try{await navigator.clipboard.writeText(out.url);status.textContent='Short outreach link copied.'}
