@@ -4,6 +4,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/og/:code.png",
+      "destination": "/api/demo-og?code=:code"
+    },
+    {
       "source": "/s/:code",
       "destination": "/api/demo-outreach?code=:code"
     },
