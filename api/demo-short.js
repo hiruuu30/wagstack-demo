@@ -13,8 +13,13 @@ async function shortenWith(host,target){
     body
   });
   const json=await out.json().catch(()=>null);
-  if(out.ok&&json?.shorturl&&/^https:\/\/(?:is|v)\.gd\/[A-Za-z0-9_]+$/.test(json.shorturl))return json.shorturl;
-  throw new Error(json?.errormessage||`Shortener returned ${out.status}`);
+  if(out.ok&&json?.shorturl){
+    try{
+      const u=new URL(String(json.shorturl));
+      if(u.protocol==='https:'&&(u.hostname==='is.gd'||u.hostname==='v.gd')&&u.pathname.length>1)return u.href;
+    }catch{}
+  }
+  throw new Error(json?.errormessage||`Shortener returned ${out.status}: ${JSON.stringify(json)}`);
 }
 
 module.exports=async(req,res)=>{
