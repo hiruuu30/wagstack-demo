@@ -4,6 +4,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/assets/alex-eala-profile.jpg",
+      "destination": "/api/alex-eala-photo"
+    },
+    {
       "source": "/og/:code.png",
       "destination": "/api/demo-og?code=:code"
     },
