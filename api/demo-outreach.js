@@ -31,18 +31,21 @@ function parseBranding(raw){
   const color=safeColor(u.searchParams.get('c')||u.searchParams.get('color'));
   const client=String(u.searchParams.get('i')||u.searchParams.get('client')||'prospect').trim().slice(0,80)||'prospect';
   const logo=String(u.searchParams.get('l')||u.searchParams.get('logo')||'').trim();
-  return {brand,color,client,logo};
+  const exp=Number(u.searchParams.get('exp')||0);
+  return {brand,color,client,logo,exp};
 }
 module.exports=async(req,res)=>{
   try{
     const code=String(first(req.query?.code)||'').trim();
     if(!/^[A-Za-z0-9._~%-]{2,64}$/.test(code))return res.status(404).send('Not found');
     const stored=await resolveCode(code);
-    const {brand,color,client,logo}=parseBranding(stored);
+    const {brand,color,client,logo,exp}=parseBranding(stored);
+    if(!Number.isFinite(exp)||exp<=Date.now())return res.status(410).send('This demo link has expired.');
     const demo=new URL('/',origin(req));
     demo.searchParams.set('brand',brand);
     demo.searchParams.set('color',color);
     demo.searchParams.set('client',client);
+    demo.searchParams.set('exp',String(exp));
     if(logo)demo.searchParams.set('logo',logo);
     const img=origin(req)+'/og/'+encodeURIComponent(code)+'.png';
     const title=brand+' — Pet care demo';
