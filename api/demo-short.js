@@ -16,13 +16,22 @@ async function spoo(raw){
     },
     body:new URLSearchParams({url:raw,'block-bots':'false'})
   });
-  const json=await out.json().catch(()=>null);
-  if(out.ok&&json?.short_url){
-    const u=new URL(String(json.short_url));
+  const text=String(await out.text()).trim();
+  let candidate='';
+  try{
+    const json=JSON.parse(text);
+    candidate=String(json?.short_url||json?.shortUrl||json?.url||'').trim();
+  }catch{
+    const match=text.match(/https:\/\/spoo\.me\/[A-Za-z0-9._~%-]+/i);
+    if(match)candidate=match[0];
+  }
+  if(out.ok&&candidate){
+    const u=new URL(candidate);
     if(u.protocol==='https:'&&u.hostname==='spoo.me'&&u.pathname.length>1)return u.href;
   }
-  throw new Error(json?.message||json?.error||('Spoo returned '+out.status));
+  throw new Error('Spoo '+out.status+': '+text.slice(0,180));
 }
+
 module.exports=async(req,res)=>{
   try{
     if(!['POST','GET'].includes(req.method)){res.setHeader('Allow','POST, GET');return reply(res,405,{error:'Method not allowed'})}
