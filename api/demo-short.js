@@ -6,20 +6,36 @@ function allowedTarget(u,req){
   return u.protocol==='https:'&&(h===requestHost||h==='demo.brickand.bond'||h.endsWith('.vercel.app'));
 }
 async function shortenWith(host,target){
-  const body=new URLSearchParams({format:'json',url:target.href});
+  const body=new URLSearchParams({format:'simple',url:target.href});
   const out=await fetch(`https://${host}/create.php`,{
     method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'WagStack Demo Link Shortener/1.0'},
+    headers:{
+      'Content-Type':'application/x-www-form-urlencoded',
+      'Accept':'text/plain,*/*;q=0.8',
+      'User-Agent':'WagStack Demo Link Shortener/1.0'
+    },
     body
   });
-  const json=await out.json().catch(()=>null);
-  if(out.ok&&json?.shorturl){
+  const raw=String(await out.text()).trim();
+
+  // is.gd/v.gd officially support "simple" responses containing just the short URL.
+  if(out.ok){
     try{
-      const u=new URL(String(json.shorturl));
+      const u=new URL(raw);
       if(u.protocol==='https:'&&(u.hostname==='is.gd'||u.hostname==='v.gd')&&u.pathname.length>1)return u.href;
     }catch{}
+
+    // Be tolerant if the service unexpectedly returns JSON despite format=simple.
+    try{
+      const json=JSON.parse(raw);
+      if(json?.shorturl){
+        const u=new URL(String(json.shorturl));
+        if(u.protocol==='https:'&&(u.hostname==='is.gd'||u.hostname==='v.gd')&&u.pathname.length>1)return u.href;
+      }
+    }catch{}
   }
-  throw new Error(json?.errormessage||`Shortener returned ${out.status}: ${JSON.stringify(json)}`);
+
+  throw new Error(raw||`Shortener returned ${out.status}`);
 }
 
 module.exports=async(req,res)=>{
