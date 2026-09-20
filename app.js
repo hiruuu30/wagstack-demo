@@ -62,7 +62,7 @@
 
   // Rolling sample dates keep the demo useful whenever it is opened.
   const demoDate=days=>{const d=new Date();d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)};
-  defaultState.profile={name:'Alex Eala',image:'https://upload.wikimedia.org/wikipedia/commons/4/4c/Alex_Eala_%28cropped%29.jpg',email:'alex@example.test',phone:'09000000000'};
+  defaultState.profile={name:'Alex Eala',image:'/assets/alex-eala-profile.jpg',email:'alex@example.test',phone:'09000000000'};
   defaultState.bookings.forEach((b,i)=>{b.date=demoDate(i+2);if(b.endDate)b.endDate=demoDate(i+4)});
   defaultState.bookingDraft={...defaultState.bookingDraft,date:demoDate(2),owner:'Alex Eala',phone:'09000000000'};
   defaultState.hotelDraft={...defaultState.hotelDraft,checkIn:demoDate(4),checkOut:demoDate(6),owner:'Alex Eala',phone:'09000000000'};
@@ -80,7 +80,8 @@
       const merged = saved ? {...cloneDefault(), ...saved, profile:{...defaultState.profile,...(saved.profile||{})}, bookingDraft:{...defaultState.bookingDraft,...(saved.bookingDraft||{})}, hotelDraft:{...defaultState.hotelDraft,...(saved.hotelDraft||{})}} : cloneDefault();
       // Demo identity refresh: migrate the previous sample fur parent without overwriting user-edited profiles.
       if(merged.profile?.name==='Alex Santos') merged.profile.name='Alex Eala';
-      if(saved?.profile?.name==='Alex Santos' && (!saved.profile.image||saved.profile.image==='/assets/fur-parent-avatar.svg')) merged.profile.image='https://upload.wikimedia.org/wikipedia/commons/4/4c/Alex_Eala_%28cropped%29.jpg';
+      if(merged.profile?.name==='Alex Eala' && (!merged.profile.image||merged.profile.image.includes('upload.wikimedia.org/wikipedia/commons/4/4c/Alex_Eala_'))) merged.profile.image='/assets/alex-eala-profile.jpg';
+      if(saved?.profile?.name==='Alex Santos' && (!saved.profile.image||saved.profile.image==='/assets/fur-parent-avatar.svg')) merged.profile.image='/assets/alex-eala-profile.jpg';
       if(merged.bookingDraft?.owner==='Alex Santos') merged.bookingDraft.owner='Alex Eala';
       if(merged.hotelDraft?.owner==='Alex Santos') merged.hotelDraft.owner='Alex Eala';
       // v22 migration: older builds stored one global health array. Preserve it for Biscuit,
