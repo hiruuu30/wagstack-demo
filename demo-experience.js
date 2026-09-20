@@ -38,10 +38,10 @@ function brandDialog(){
     <label>Accent color<input type="color" name="color" value="${esc(config.color)}"></label>
     <label>Upload logo<input type="file" name="logoFile" accept="image/png,image/jpeg,image/webp,image/svg+xml"></label>
     <div class="demo-logo-upload-preview" ${config.logo?'':'hidden'}><img data-logo-preview src="${esc(config.logo||'')}" alt="Logo preview"></div>
-    <small class="demo-upload-note">PNG, JPG, WebP or SVG, up to 2 MB. The logo is included when you copy the demo link.</small>
+    <small class="demo-upload-note">PNG, JPG, WebP or SVG, up to 2 MB. Outreach links include your prospect’s name and logo in the link preview.</small>
     <label>Or use a logo image URL<input type="url" name="logo" placeholder="https://your-site.com/logo.png" value="${esc(/^https:\/\//i.test(config.logo)?config.logo:'')}"></label>
     <label>Client link label<input name="client" maxlength="60" pattern="[A-Za-z0-9_-]+" value="${esc(config.client)}" required></label>
-    <div class="demo-form-actions"><button class="demo-primary" type="submit">Apply branding</button><button type="button" data-copy-brand>Copy share link</button></div>
+    <div class="demo-form-actions"><button class="demo-primary" type="submit">Apply branding</button><button type="button" data-copy-brand>Copy outreach link</button></div>
     <p class="demo-form-status" role="status"></p>
   </form>`);
   const form=d.querySelector('form'),status=d.querySelector('[role=status]'),fileInput=d.querySelector('[name=logoFile]'),previewWrap=d.querySelector('.demo-logo-upload-preview'),preview=d.querySelector('[data-logo-preview]');
@@ -102,6 +102,31 @@ function brandDialog(){
     selectedFile=null;
     return uploadedUrl;
   }
+  async function compactOutreachLogo(value){
+    if(!/^data:image\//i.test(value||''))return value||'';
+    const img=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=value});
+    const render=(max,quality)=>{
+      const scale=Math.min(1,max/img.naturalWidth,max/img.naturalHeight);
+      const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+      const webp=canvas.toDataURL('image/webp',quality);
+      return webp.startsWith('data:image/webp')?webp:canvas.toDataURL('image/png');
+    };
+    let data=render(80,.74);
+    if(data.length>4200)data=render(64,.66);
+    if(data.length>3600)data=render(48,.58);
+    if(data.length>5200)throw new Error('Please use a simpler logo image for the outreach preview.');
+    return data;
+  }
+  const outreachLanding=async v=>{
+    const u=new URL('/api/demo-share',location.origin);
+    u.searchParams.set('b',v.name);
+    u.searchParams.set('c',v.color.slice(1));
+    u.searchParams.set('i',v.client);
+    if(v.logo)u.searchParams.set('l',await compactOutreachLogo(v.logo));
+    return u.href;
+  };
   async function collect(){
     const v=baseValues();
     if(!form.reportValidity())return null;
@@ -109,7 +134,24 @@ function brandDialog(){
     try{return {...v,logo:await uploadIfNeeded(v)}}catch(err){status.textContent=err.message||'Logo upload failed.';return null}
   }
   form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('[type=submit]');button.disabled=true;const v=await collect();if(!v){button.disabled=false;return}localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));location.href=link(v)};
-  d.querySelector('[data-copy-brand]').onclick=async()=>{const v=await collect();if(!v)return;const share=link(v);localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));try{await navigator.clipboard.writeText(share);status.textContent='Link copied with the logo included.'}catch{status.textContent=share}};
+  d.querySelector('[data-copy-brand]').onclick=async()=>{
+    const button=d.querySelector('[data-copy-brand]');button.disabled=true;
+    const v=await collect();
+    if(!v){button.disabled=false;return}
+    localStorage.setItem('demo-brand',JSON.stringify({name:v.name,color:v.color,logo:v.logo,client:v.client}));
+    try{
+      status.textContent='Creating branded outreach link…';
+      const landing=await outreachLanding(v);
+      const r=await fetch('/api/demo-short',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:landing})});
+      const out=await r.json().catch(()=>({}));
+      if(!r.ok||!out.url)throw new Error(out.error||'Could not create outreach link');
+      try{await navigator.clipboard.writeText(out.url);status.textContent='Outreach link copied. Its preview uses '+v.name+' and the prospect logo.'}
+      catch{status.textContent=out.url}
+    }catch(err){
+      status.textContent=err.message||'Could not create outreach link. Please try again.';
+    }
+    button.disabled=false;
+  };
 }
 function inquiry(){track('inquiry_click');const d=dialog('Let’s make it yours.',`<p>Tell Brick & Bond about your business. Your request includes the demo branding you’re viewing.</p><form><label>Business name<input name="business" maxlength="100" required value="${esc(config.name==='Your Brand'?'':config.name)}"></label><label>Your name<input name="name" maxlength="100" required autocomplete="name"></label><label>Email address<input name="email" type="email" maxlength="180" required autocomplete="email"></label><label>What would you like included?<textarea name="needs" maxlength="2000">Grooming and hotel booking, pet profiles, rewards, and shop.</textarea></label><label class="demo-honeypot">Website<input name="website" tabindex="-1" autocomplete="off"></label><label class="demo-checkbox"><input type="checkbox" required name="consent">I agree to share these details with Brick & Bond so they can respond to this inquiry.</label><button class="demo-primary" type="submit">Request my own version</button><p class="demo-form-status" role="status"></p><p>This sends a real inquiry, not a demo booking. No payment is collected.</p></form>`);d.querySelector('form').onsubmit=async e=>{e.preventDefault();const form=e.target,button=form.querySelector('[type=submit]'),status=form.querySelector('[role=status]');button.disabled=true;status.textContent='Sending your request…';const payload={...Object.fromEntries(new FormData(form)),client:config.client,brand:config.name,color:config.color};try{const r=await fetch('/api/demo-inquiry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw Error();status.textContent='Your request is saved. Brick & Bond will review your details and contact you.';form.querySelectorAll('input,textarea').forEach(e=>e.disabled=true);track('inquiry_submit')}catch{status.replaceChildren(document.createTextNode('Your request was not sent. Please try again, or '));const a=document.createElement('a');a.textContent='open an email draft';a.href='mailto:hello@brickand.bond?subject='+encodeURIComponent('Pet-care app inquiry — '+payload.business)+'&body='+encodeURIComponent(`Name: ${payload.name}\nBusiness: ${payload.business}\nEmail: ${payload.email}\nInterested in: ${payload.needs}\nDemo: ${config.client}`);status.append(a);button.disabled=false}}}
 const tour=[{path:'/',title:'Here’s the customer view.',copy:'This is where customers can see their pets, appointments, care reminders, and rewards.',target:'.home__glass--showcase'},{path:'/pets',title:'Here’s Biscuit’s profile.',copy:'Each pet has their own profile, with basic details and care records in one place.',target:'.pet-workspace-v25'},{path:'/grooming',title:'Try booking a service.',copy:'Choose a service, date, and time. You can fill it out yourself or add a sample booking.',target:'.clone-glass',action:true},{owner:true,title:'Now check the owner side.',copy:'The booking shows up here. You can confirm it, and the customer will see the updated status.',target:'.demo-owner-list'},{path:'/rewards',title:'Rewards are here too.',copy:'Customers can check their points and membership along with their bookings and pet records.',target:'.clone-glass'},{path:'/',title:'That’s the basic flow.',copy:'You can also try your business name and logo, or tell us what you’d want in your own version.',target:'.home__brand-slot'}];
