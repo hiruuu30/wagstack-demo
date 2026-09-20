@@ -27,7 +27,7 @@ async function spoo(raw){
   }
   if(out.ok&&candidate){
     const u=new URL(candidate);
-    if(u.protocol==='https:'&&u.hostname==='spoo.me'&&u.pathname.length>1)return u.href;
+    if((u.protocol==='https:'||u.protocol==='http:')&&u.hostname==='spoo.me'&&u.pathname.length>1){u.protocol='https:';return u.href;}
   }
   throw new Error('Spoo '+out.status+': '+text.slice(0,180));
 }
