@@ -92,7 +92,9 @@ function brandDialog(){
       const res=await fetch('/api/demo-logo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data,type:file.type,name:file.name,client:v.client})});
       const out=await res.json().catch(()=>({}));
       if(res.ok&&out.url){
-        uploadedUrl=out.url;selectedFile=null;return uploadedUrl;
+        uploadedUrl=out.embedded?await compactLogo(file):out.url;
+        selectedFile=null;
+        return uploadedUrl;
       }
     }catch{}
     status.textContent='Adding logo to the share link…';
