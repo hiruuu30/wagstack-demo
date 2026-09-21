@@ -22,12 +22,13 @@ module.exports=(req,res)=>{
   const client=String(first(req.query?.i)||'prospect').trim().slice(0,80)||'prospect';
   const logo=String(first(req.query?.l)||'').trim();
   const exp=Number(first(req.query?.exp)||0);
-  if(!Number.isFinite(exp)||exp<=Date.now())return res.status(410).send('This demo link has expired.');
+  // Links created before expiry support was added have no exp value and remain valid.
+  if(Number.isFinite(exp)&&exp>0&&exp<=Date.now())return res.status(410).send('This demo link has expired.');
   const demo=new URL('/',origin(req));
   demo.searchParams.set('brand',brand);
   demo.searchParams.set('color',color);
   demo.searchParams.set('client',client);
-  demo.searchParams.set('exp',String(exp));
+  if(Number.isFinite(exp)&&exp>0)demo.searchParams.set('exp',String(exp));
   if(logo)demo.searchParams.set('logo',logo);
 
   const img=imageUrl(req,logo);
