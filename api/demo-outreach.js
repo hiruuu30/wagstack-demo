@@ -40,12 +40,13 @@ module.exports=async(req,res)=>{
     if(!/^[A-Za-z0-9._~%-]{2,64}$/.test(code))return res.status(404).send('Not found');
     const stored=await resolveCode(code);
     const {brand,color,client,logo,exp}=parseBranding(stored);
-    if(!Number.isFinite(exp)||exp<=Date.now())return res.status(410).send('This demo link has expired.');
+    // Legacy outreach links created before expiry was introduced have no exp value; keep them valid.
+    if(Number.isFinite(exp)&&exp>0&&exp<=Date.now())return res.status(410).send('This demo link has expired.');
     const demo=new URL('/',origin(req));
     demo.searchParams.set('brand',brand);
     demo.searchParams.set('color',color);
     demo.searchParams.set('client',client);
-    demo.searchParams.set('exp',String(exp));
+    if(Number.isFinite(exp)&&exp>0)demo.searchParams.set('exp',String(exp));
     if(logo)demo.searchParams.set('logo',logo);
     const img=origin(req)+'/og/'+encodeURIComponent(code)+'.png';
     const title=brand+' — Pet care demo';
